@@ -1,0 +1,5 @@
+make,model,year,kbbId,insurance,maintenance,fuel,depreciation,price_point,resale_value,safety_rating,
+Honda,CR-V,2017,421734,6100,1937,32,12376,19630,7254,5,
+Ford,Escape,2017,415933,4715,2219,24,18348,24645,6297,5,
+Hyundai,Santa Fe Sport,2017,415685,5190,1960,24,16309,26245,9936,5,
+Toyota,RAV4,2017,421332,5320,2271,26,15551,25370,9819,5,

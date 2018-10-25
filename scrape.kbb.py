@@ -1,8 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
+from decimal import Decimal
+from re import sub
+import re
 
 cars = [{"make":"Honda", "model":"CR-V", "year":"2017", "kbbId":"421734"},
         {"make":"Ford", "model":"Escape", "year":"2017", "kbbId":"415933"},
+        {"make":"Hyundai", "model":"Santa Fe Sport", "year":"2017", "kbbId":"415685"},
         {"make":"Toyota", "model":"RAV4", "year":"2017", "kbbId":"421332"}]
 
 def getDataForCar(vehicleId):
@@ -22,11 +26,13 @@ def getDataForCar(vehicleId):
     for pr in price :
        if pr['type'] == 'MSRP':
          base_price = pr['base']
-    carData["insurance"] = insurance_cost
-    carData["maintenance"] = maintenance_cost
-    carData['fuel'] = fuel_econ
-    carData['depreciation'] = depreciation
-    carData['base'] = base_price
+    carData["insurance"] = Decimal(sub(r'[^\d.]', '', insurance_cost))
+    carData["maintenance"] = Decimal(sub(r'[^\d.]', '', maintenance_cost))
+    print(re.search('.*Comb ([0-9]*).*', fuel_econ).group(1))
+    carData['fuel'] = re.search('.*Comb ([0-9]*).*', fuel_econ).group(1)
+    carData['depreciation'] = Decimal(sub(r'[^\d.]', '', depreciation))
+    carData['price_point'] = Decimal(base_price)
+    carData['resale_value'] = Decimal(base_price) - carData['depreciation']
     return carData
 
 
@@ -36,11 +42,32 @@ def getSafetyRatings(vYear,vMake,vModel):
     for rating in  json['results'][0]['safetyRatings']['crashTestRatings']:
         if rating['type']=='overall':
             for rating_type in rating['ratings']:
-                car_ratings[rating_type['position']]=rating_type['rating']
+                if rating_type['position'] == "overall" :
+                    car_ratings['safety_rating']=rating_type['rating']
     return car_ratings
 
-for car in cars :
-    data = getDataForCar(car["kbbId"])
-    safety = getSafetyRatings(car["year"],car["make"],car["model"])
-    print ({**car,**data,**safety})
+def buildDataSet():
+    dataSet = []
+    for car in cars :
+        data = getDataForCar(car["kbbId"])
+        safety = getSafetyRatings(car["year"],car["make"],car["model"])
+        dataSet.append({**car,**data,**safety})
+    return dataSet
+
+def generateCSV():
+    dataSet = buildDataSet()
+    csv = open("cars.csv", "w")
+    for header in dataSet[0].keys():
+        # print(header)
+        csv.write(header+",")
+    csv.write("\n")
+    print("Generating Data")
+    for car in dataSet :
+        for key in car.keys():
+            # print(car[key])
+            csv.write(str(car[key])+",")
+        csv.write("\n")
+
+generateCSV()
+
 
