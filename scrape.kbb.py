@@ -4,7 +4,7 @@ from decimal import Decimal
 from re import sub
 import re
 
-cars = [{"make":"Honda", "model":"CR-V", "year":"2017", "kbbId":"421734"},
+cars = [{"make":"Honda", "model":"CR-V", "year":"2017", "kbbId":"422378"},
         {"make":"Ford", "model":"Escape", "year":"2017", "kbbId":"415933"},
         {"make":"Hyundai", "model":"Santa Fe Sport", "year":"2017", "kbbId":"415685"},
         {"make":"Toyota", "model":"RAV4", "year":"2017", "kbbId":"421332"}]
@@ -24,7 +24,7 @@ def getDataForCar(vehicleId):
     price = json['data']['apiData']['vehicle']['values']
     base_price = 0
     for pr in price :
-       if pr['type'] == 'MSRP':
+        if pr['type'] == 'MSRP':
          base_price = pr['base']
     carData["insurance"] = Decimal(sub(r'[^\d.]', '', insurance_cost))
     carData["maintenance"] = Decimal(sub(r'[^\d.]', '', maintenance_cost))
@@ -69,5 +69,6 @@ def generateCSV():
         csv.write("\n")
 
 generateCSV()
+#print(buildDataSet())
 
 
